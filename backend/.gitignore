@@ -1,0 +1,29 @@
+
+# Archivos subidos por los usuarios (imágenes de productos/servicios)
+app/uploads/*
+!app/uploads/.gitkeep
+
+# Variables de entorno (NUNCA deben publicarse en GitHub)
+.env
+.env.local
+.env.*.local
+
+# Cache de Python
+__pycache__/
+*.pyc
+
+# Archivos de configuración de IDEs
+*.vscode/
+
+# Archivos de logs
+*.log   
+
+# Archivos de base de datos
+*.bd.sql
+
+#Archivos de Despliegue 
+.DEPLOYMENT.md
+
+#Archivos de Guias de Cambios 
+*.GUIA_DE_CAMBIOS.md
+

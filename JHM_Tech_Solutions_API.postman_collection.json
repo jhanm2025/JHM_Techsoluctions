@@ -1,0 +1,505 @@
+{
+  "info": {
+    "name": "JHM Tech Solutions - API",
+    "description": "Colección completa de la API (FastAPI). Incluye autenticación, usuarios, empleados, productos, servicios, ventas, facturas, PQR, chatbot, reportes y dashboard.\n\nCómo usarla:\n1. Ajusta la variable de colección 'base_url' si no usas localhost:8000.\n2. Ejecuta 'Auth > Login (admin)' primero: guarda automáticamente el token en la variable 'token'.\n3. Todas las demás peticiones usan {{token}} en el header Authorization.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://127.0.0.1:8000" },
+    { "key": "token", "value": "" },
+    { "key": "token_cliente", "value": "" },
+    { "key": "id_producto", "value": "" },
+    { "key": "id_servicio", "value": "" },
+    { "key": "id_cliente", "value": "" },
+    { "key": "id_venta", "value": "" },
+    { "key": "id_factura", "value": "" },
+    { "key": "id_pqr", "value": "" },
+    { "key": "conversacion_id", "value": "" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const data = pm.response.json();",
+            "if (data.access_token) { pm.collectionVariables.set('token', data.access_token); }"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"admin@jhmtechsolutions.com\",\n  \"password\": \"Admin123!\"\n}" },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Login (cliente)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const data = pm.response.json();",
+            "if (data.access_token) { pm.collectionVariables.set('token_cliente', data.access_token); }"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"cliente@correo.com\",\n  \"password\": \"Password1!\"\n}" },
+            "url": "{{base_url}}/auth/login"
+          }
+        },
+        {
+          "name": "Mi perfil (/auth/me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/auth/me"
+          }
+        },
+        {
+          "name": "Olvidé mi contraseña",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"cliente@correo.com\"\n}" },
+            "url": "{{base_url}}/auth/forgot-password"
+          }
+        },
+        {
+          "name": "Restablecer contraseña",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"PEGA_AQUI_EL_TOKEN_RECIBIDO\",\n  \"password\": \"NuevaPass123!\"\n}" },
+            "url": "{{base_url}}/auth/reset-password"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Usuarios",
+      "item": [
+        {
+          "name": "Registrar cliente (público)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombres\": \"Ana\",\n  \"apellidos\": \"Gomez\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"1122334455\",\n  \"email\": \"cliente@correo.com\",\n  \"password\": \"Password1!\"\n}" },
+            "url": "{{base_url}}/usuarios/"
+          }
+        },
+        {
+          "name": "Mi perfil (/usuarios/me)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/usuarios/me"
+          }
+        },
+        {
+          "name": "Listar usuarios (admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/usuarios/"
+          }
+        },
+        {
+          "name": "Listar clientes (admin/empleado)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/usuarios/clientes/lista"
+          }
+        },
+        {
+          "name": "Actualizar usuario (rol/estado) - admin",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"activo\"\n}" },
+            "url": "{{base_url}}/usuarios/1"
+          }
+        },
+        {
+          "name": "Listar roles",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/usuarios/roles/lista"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Empleados",
+      "item": [
+        {
+          "name": "Crear empleado (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombres\": \"Carlos\",\n  \"apellidos\": \"Ramirez\",\n  \"tipo_documento\": \"CC\",\n  \"numero_documento\": \"55555555\",\n  \"email\": \"carlos@jhm.com\"\n}" },
+            "url": "{{base_url}}/usuarios/empleados"
+          }
+        },
+        {
+          "name": "Listar empleados (admin)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/usuarios/empleados/lista"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Productos",
+      "item": [
+        {
+          "name": "Listar productos (público)",
+          "request": { "method": "GET", "url": "{{base_url}}/productos/?estado=activo" }
+        },
+        {
+          "name": "Obtener producto por ID",
+          "request": { "method": "GET", "url": "{{base_url}}/productos/{{id_producto}}" }
+        },
+        {
+          "name": "Crear producto (admin/empleado)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const data = pm.response.json();",
+            "if (data.id_producto) { pm.collectionVariables.set('id_producto', data.id_producto); }"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Router WiFi 6\",\n  \"categoria\": \"Redes\",\n  \"descripcion\": \"Router de alto rendimiento\",\n  \"precio\": 350000,\n  \"stock\": 10\n}" },
+            "url": "{{base_url}}/productos/"
+          }
+        },
+        {
+          "name": "Actualizar producto (admin/empleado)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"stock\": 8\n}" },
+            "url": "{{base_url}}/productos/{{id_producto}}"
+          }
+        },
+        {
+          "name": "Desactivar producto (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/productos/{{id_producto}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Servicios",
+      "item": [
+        {
+          "name": "Listar servicios (público)",
+          "request": { "method": "GET", "url": "{{base_url}}/servicios/?estado=activo" }
+        },
+        {
+          "name": "Obtener servicio por ID",
+          "request": { "method": "GET", "url": "{{base_url}}/servicios/{{id_servicio}}" }
+        },
+        {
+          "name": "Crear servicio (admin/empleado)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const data = pm.response.json();",
+            "if (data.id_servicio) { pm.collectionVariables.set('id_servicio', data.id_servicio); }"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"nombre\": \"Soporte TI\",\n  \"categoria\": \"Soporte\",\n  \"tipo_servicio\": \"soporte\",\n  \"descripcion\": \"Soporte tecnico remoto\",\n  \"precio_minimo\": 50000,\n  \"precio_maximo\": 150000\n}" },
+            "url": "{{base_url}}/servicios/"
+          }
+        },
+        {
+          "name": "Actualizar servicio (admin/empleado)",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"precio_maximo\": 180000\n}" },
+            "url": "{{base_url}}/servicios/{{id_servicio}}"
+          }
+        },
+        {
+          "name": "Desactivar servicio (admin)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/servicios/{{id_servicio}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Uploads (imágenes)",
+      "item": [
+        {
+          "name": "Subir imagen de producto/servicio",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "body": { "mode": "formdata", "formdata": [{ "key": "archivo", "type": "file", "src": "" }] },
+            "url": "{{base_url}}/uploads/imagen"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Ventas",
+      "item": [
+        {
+          "name": "Registrar venta (auto-genera factura)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const data = pm.response.json();",
+            "if (data.id_venta) { pm.collectionVariables.set('id_venta', data.id_venta); }",
+            "if (data.factura) { pm.collectionVariables.set('id_factura', data.factura.id_factura); }"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id_cliente\": {{id_cliente}},\n  \"items\": [\n    { \"tipo\": \"producto\", \"id_item\": {{id_producto}}, \"cantidad\": 2 }\n  ],\n  \"descuento_porcentaje\": 5,\n  \"impuesto_porcentaje\": 19,\n  \"observaciones\": \"Venta de prueba\"\n}" },
+            "url": "{{base_url}}/ventas/"
+          }
+        },
+        {
+          "name": "Historial de ventas (con filtros)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/ventas/?fecha_desde=2026-01-01&estado=completada"
+          }
+        },
+        {
+          "name": "Obtener venta por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/ventas/{{id_venta}}"
+          }
+        },
+        {
+          "name": "Cambiar estado de venta",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"completada\"\n}" },
+            "url": "{{base_url}}/ventas/{{id_venta}}/estado"
+          }
+        },
+        {
+          "name": "Descargar factura de la venta (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/ventas/{{id_venta}}/factura/pdf"
+          }
+        },
+        {
+          "name": "Reporte diario de ventas (JSON)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/ventas/reporte/diario"
+          }
+        },
+        {
+          "name": "Reporte de ventas (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/ventas/reporte/pdf?fecha_desde=2026-01-01&fecha_hasta=2026-12-31"
+          }
+        },
+        {
+          "name": "Reporte de ventas (Excel)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/ventas/reporte/excel?fecha_desde=2026-01-01&fecha_hasta=2026-12-31"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Facturas",
+      "item": [
+        {
+          "name": "Crear factura directa (sin venta)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"id_cliente\": {{id_cliente}},\n  \"items\": [\n    { \"tipo\": \"servicio\", \"id_item\": {{id_servicio}}, \"cantidad\": 1 }\n  ],\n  \"descuento_porcentaje\": 0,\n  \"impuesto_porcentaje\": 19\n}" },
+            "url": "{{base_url}}/facturas/"
+          }
+        },
+        {
+          "name": "Listar facturas (según rol)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/facturas/"
+          }
+        },
+        {
+          "name": "Obtener factura por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/facturas/{{id_factura}}"
+          }
+        },
+        {
+          "name": "Descargar factura (PDF)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/facturas/{{id_factura}}/pdf"
+          }
+        },
+        {
+          "name": "Cambiar estado de factura",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"estado\": \"pagada\"\n}" },
+            "url": "{{base_url}}/facturas/{{id_factura}}/estado"
+          }
+        },
+        {
+          "name": "Exportar facturas (Excel)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/facturas/exportar/excel"
+          }
+        }
+      ]
+    },
+    {
+      "name": "PQR",
+      "item": [
+        {
+          "name": "Crear PQR (cliente)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const data = pm.response.json();",
+            "if (data.id_pqr) { pm.collectionVariables.set('id_pqr', data.id_pqr); }"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token_cliente}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"tipo\": \"peticion\",\n  \"asunto\": \"Solicitud de garantia\",\n  \"descripcion\": \"Quiero solicitar la garantia de mi producto comprado.\"\n}" },
+            "url": "{{base_url}}/pqr/"
+          }
+        },
+        {
+          "name": "Listar PQR (según rol)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/pqr/"
+          }
+        },
+        {
+          "name": "Obtener PQR por ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/pqr/{{id_pqr}}"
+          }
+        },
+        {
+          "name": "Responder PQR (admin/empleado)",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"respuesta\": \"Su garantia ha sido aprobada.\",\n  \"estado\": \"respondida\"\n}" },
+            "url": "{{base_url}}/pqr/{{id_pqr}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Chatbot",
+      "item": [
+        {
+          "name": "Enviar mensaje (público o autenticado)",
+          "event": [{ "listen": "test", "script": { "exec": [
+            "const data = pm.response.json();",
+            "if (data.conversacion_id) { pm.collectionVariables.set('conversacion_id', data.conversacion_id); }"
+          ]}}],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"mensaje\": \"Hola, quiero saber sobre sus servicios\"\n}" },
+            "url": "{{base_url}}/chatbot/mensaje"
+          }
+        },
+        {
+          "name": "Continuar conversación",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": { "mode": "raw", "raw": "{\n  \"mensaje\": \"Quiero registrar una queja\",\n  \"conversacion_id\": {{conversacion_id}}\n}" },
+            "url": "{{base_url}}/chatbot/mensaje"
+          }
+        },
+        {
+          "name": "Listar conversaciones (admin/empleado)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/chatbot/conversaciones"
+          }
+        }
+      ]
+    },
+    {
+      "name": "Reportes y Dashboard",
+      "item": [
+        {
+          "name": "Dashboard analítico",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/reportes/dashboard"
+          }
+        },
+        {
+          "name": "Reporte usuarios (PDF)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{base_url}}/reportes/usuarios/pdf" }
+        },
+        {
+          "name": "Reporte usuarios (Excel)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{base_url}}/reportes/usuarios/excel" }
+        },
+        {
+          "name": "Reporte empleados (PDF)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{base_url}}/reportes/empleados/pdf" }
+        },
+        {
+          "name": "Reporte productos (PDF)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{base_url}}/reportes/productos/pdf" }
+        },
+        {
+          "name": "Reporte productos (Excel)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{base_url}}/reportes/productos/excel" }
+        },
+        {
+          "name": "Reporte servicios (PDF)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{base_url}}/reportes/servicios/pdf" }
+        },
+        {
+          "name": "Reporte servicios (Excel)",
+          "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }], "url": "{{base_url}}/reportes/servicios/excel" }
+        }
+      ]
+    }
+  ]
+}
