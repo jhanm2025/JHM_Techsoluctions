@@ -1,0 +1,9 @@
+# Ignorar todos los archivos en la raíz del proyecto
+/*
+
+# Exceptuar los archivos específicos que sí quieras subir (opcional)
+!/.gitignore
+
+# Asegurar que las carpetas frontend y backend no se ignoren
+!/frontend/
+!/backend/
